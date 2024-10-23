@@ -12,11 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Import hook for ensuring that Altair's Colab renderer is registered."""
-
-import imp  # pylint: disable=deprecated-module
+import importlib.util
 import logging
 import os
 import sys
+from importlib import import_module
+from importlib.util import find_spec
 
 import IPython
 
@@ -28,13 +29,14 @@ _bokeh_resources = None
 _bokeh_io_module = None
 
 
+
 class _BokehImportHook:
   """Configures Bokeh's renderer to support Colab upon import."""
 
   def find_module(self, fullname, path=None):
     if fullname not in ['bokeh.io']:
       return None
-    self.module_info = imp.find_module(fullname.split('.')[-1], path)
+    self.module_info = find_spec(fullname.split('.')[-1], path)
     return self
 
   def load_module(self, name):
@@ -42,7 +44,7 @@ class _BokehImportHook:
     global _bokeh_io_module
 
     previously_loaded = name in sys.modules
-    _bokeh_io_module = imp.load_module(name, *self.module_info)
+    _bokeh_io_module = importlib.util.module_from_spec(self.module_info)
 
     if not previously_loaded:
       try:

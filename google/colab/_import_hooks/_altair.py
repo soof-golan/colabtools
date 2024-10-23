@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Import hook for ensuring that Altair's Colab renderer is registered."""
-
-import imp  # pylint: disable=deprecated-module
+import importlib
 import logging
 import os
 import sys
+from importlib.util import find_spec
 
 
 class _AltairImportHook:
@@ -29,13 +29,13 @@ class _AltairImportHook:
         'altair.vegalite.v4',
     ]:
       return None
-    self.module_info = imp.find_module(fullname.split('.')[-1], path)
+    self.module_info = find_spec(fullname.split('.')[-1], path)
     return self
 
   def load_module(self, fullname):
     """Loads Altair normally and runs pre-initialization code."""
     previously_loaded = fullname in sys.modules
-    altair_module = imp.load_module(fullname, *self.module_info)
+    altair_module = importlib.util.module_from_spec(self.module_info)
 
     if not previously_loaded:
       try:

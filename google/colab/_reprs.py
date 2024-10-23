@@ -18,7 +18,7 @@ with warnings.catch_warnings():
   # Importing via IPython raises a spurious warning, but avoids a version
   # mismatch internally.
   warnings.simplefilter('ignore')
-  from IPython.utils import traitlets
+  import traitlets
 
 
 _original_string_formatters = {}

@@ -14,10 +14,11 @@
 """Import hook to disable cv.imshow() and cv2.imshow() within Colab."""
 
 import functools
-import imp  # pylint: disable=deprecated-module
+import importlib  # pylint: disable=deprecated-module
 import logging
 import os
 import sys
+from importlib.util import find_spec
 
 
 class DisabledFunctionError(ValueError):
@@ -74,8 +75,8 @@ class _OpenCVImportHook:
     """Loads cv/cv2 normally and runs pre-initialization code."""
     previously_loaded = name in sys.modules
 
-    module_info = imp.find_module(name, self.path)
-    cv_module = imp.load_module(name, *module_info)
+    module_info = find_spec(name, self.path)
+    cv_module = importlib.util.module_from_spec(module_info)
 
     if not previously_loaded:
       try:

@@ -17,10 +17,11 @@ This will enable the IP geolocation restrictions for the Gemini API to be based
 on the location of the user instead of the runtime VM.
 """
 
-import imp  # pylint: disable=deprecated-module
+import importlib  # pylint: disable=deprecated-module
 import logging
 import os
 import sys
+from importlib.util import find_spec
 
 
 class _GenerativeAIImportHook:
@@ -29,7 +30,7 @@ class _GenerativeAIImportHook:
   def find_module(self, fullname, path=None):
     if fullname != 'google.generativeai':
       return None
-    self.module_info = imp.find_module(
+    self.module_info = find_spec(
         fullname.split('.')[-1], list(path) if path else None
     )
     return self
@@ -47,7 +48,7 @@ class _GenerativeAIImportHook:
       A modified google.generativeai module.
     """
     previously_loaded = fullname in sys.modules
-    generativeai_module = imp.load_module(fullname, *self.module_info)
+    generativeai_module = importlib.util.module_from_spec(self.module_info)
 
     if not previously_loaded:
       try:

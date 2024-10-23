@@ -13,10 +13,11 @@
 # limitations under the License.
 """Import hook to add colab specific user agent."""
 
-import imp  # pylint:disable=deprecated-module
+import importlib  # pylint:disable=deprecated-module
 import logging
 import os
 import sys
+from importlib.util import find_spec
 
 APPLICATION_NAME = 'google-colab'
 
@@ -27,7 +28,7 @@ class APICoreClientInfoImportHook:
   def find_module(self, fullname, path=None):
     if fullname not in ['google.api_core.client_info']:
       return None
-    self.module_info = imp.find_module(fullname.split('.')[-1], path)
+    self.module_info = find_spec(fullname.split('.')[-1], path)
     return self
 
   def load_module(self, fullname):
@@ -44,7 +45,7 @@ class APICoreClientInfoImportHook:
     """
 
     previously_loaded = fullname in sys.modules
-    client_info_module = imp.load_module(fullname, *self.module_info)
+    client_info_module = importlib.util.module_from_spec(self.module_info)
 
     if not previously_loaded:
       try:

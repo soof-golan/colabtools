@@ -13,10 +13,11 @@
 # limitations under the License.
 """Import hook to allow credentials provided by Colab."""
 
-import imp  # pylint: disable=deprecated-module
+import importlib  # pylint: disable=deprecated-module
 import logging
 import os
 import sys
+from importlib.util import find_spec
 
 
 class _PyDrive2ImportHook:
@@ -30,14 +31,14 @@ class _PyDrive2ImportHook:
     uses_auth_ephem = os.environ.get('USE_AUTH_EPHEM', '0') == '1'
     if not uses_auth_ephem:
       return None
-    self.module_info = imp.find_module(fullname.split('.')[-1], path)
+    self.module_info = find_spec(fullname.split('.')[-1], path)
     return self
 
   def load_module(self, name):
     """Loads PyDrive2 normally and runs pre-initialization code."""
     previously_loaded = name in sys.modules
 
-    pydrive_auth_module = imp.load_module(name, *self.module_info)
+    pydrive_auth_module = importlib.util.module_from_spec(self.module_info)
 
     if not previously_loaded:
       try:

@@ -40,7 +40,7 @@ with _warnings.catch_warnings():
   # Importing via IPython raises a spurious warning, but avoids a version
   # mismatch internally.
   _warnings.simplefilter('ignore')
-  from IPython.utils import traitlets as _traitlets
+  import traitlets as _traitlets
 
 # pylint: enable=g-import-not-at-top
 
